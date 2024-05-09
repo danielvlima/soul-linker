@@ -3,10 +3,12 @@ package soullinker.com.soullinker.services;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import soullinker.com.soullinker.dtos.UserRequest;
+import soullinker.com.soullinker.dtos.CreateUserRequest;
+import soullinker.com.soullinker.dtos.UserResponse;
 import soullinker.com.soullinker.models.User;
 import soullinker.com.soullinker.repositories.UserRepository;
 
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -19,12 +21,29 @@ public class UserService {
         return userRepository.findById(userId).orElse(null);
     }
 
-    public void createUser(UserRequest userRequest){
-        User user = new User();
-        user.setName(userRequest.getName());
-        user.setBirthDate(userRequest.getBirthDate());
+    public UserResponse createUser(CreateUserRequest userRequest){
+        User user = User.builder()
+                .name(userRequest.getName())
+                .birthDate(userRequest.getBirthDate())
+                .password(userRequest.getPassword())
+                .cpf(userRequest.getCpf())
+                .email(userRequest.getEmail())
+                .build();
+        Optional<User> existingUser = userRepository.findByEmail(userRequest.getEmail());
+        if (existingUser.isPresent()) {
+            throw new RuntimeException("A user with the provided email already exists.");
+        }
 
         User createdUser = userRepository.save(user);
-        System.out.println(createdUser.getName());
+
+        UserResponse userResponse = UserResponse.builder()
+                .id(createdUser.getId())
+                .name(createdUser.getName())
+                .birthDate(createdUser.getBirthDate())
+                .cpf(createdUser.getCpf())
+                .email(createdUser.getEmail())
+                .build();
+
+        return userResponse;
     }
 }

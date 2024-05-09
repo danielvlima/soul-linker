@@ -4,7 +4,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import soullinker.com.soullinker.dtos.UserRequest;
+import org.springframework.web.util.UriComponentsBuilder;
+import soullinker.com.soullinker.dtos.CreateUserRequest;
+import soullinker.com.soullinker.dtos.UserResponse;
 import soullinker.com.soullinker.models.User;
 import soullinker.com.soullinker.services.UserService;
 
@@ -23,9 +25,13 @@ public class UserController {
     }
 
     @PostMapping("/user")
-    @ResponseStatus(HttpStatus.CREATED)
-    public void createUser(@RequestBody UserRequest userRequest) {
-        userService.createUser(userRequest);
-//        return new ResponseEntity<>(createdUser, HttpStatus.CREATED);
+    public ResponseEntity createUser(@RequestBody CreateUserRequest userRequest) {
+        try {
+            UserResponse createdUser = userService.createUser(userRequest);
+            return ResponseEntity.status(HttpStatus.CREATED).body(createdUser);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest()
+                    .body(e.getMessage());
+        }
     }
 }
