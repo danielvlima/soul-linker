@@ -2,6 +2,8 @@ package soullinker.com.soullinker.services;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCrypt;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import soullinker.com.soullinker.dtos.CreateUserRequest;
 import soullinker.com.soullinker.dtos.UserResponse;
@@ -16,6 +18,10 @@ import java.util.UUID;
 public class UserService {
     @Autowired
     private UserRepository userRepository;
+
+    private BCryptPasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
 
     public User getUser(UUID userId) {
         return userRepository.findById(userId).orElse(null);
@@ -34,16 +40,16 @@ public class UserService {
             throw new RuntimeException("A user with the provided email already exists.");
         }
 
+        user.setPassword(passwordEncoder().encode(user.getPassword()));
+
         User createdUser = userRepository.save(user);
 
-        UserResponse userResponse = UserResponse.builder()
+        return UserResponse.builder()
                 .id(createdUser.getId())
                 .name(createdUser.getName())
                 .birthDate(createdUser.getBirthDate())
                 .cpf(createdUser.getCpf())
                 .email(createdUser.getEmail())
                 .build();
-
-        return userResponse;
     }
 }

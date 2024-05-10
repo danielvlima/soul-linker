@@ -2,12 +2,11 @@ package soullinker.com.soullinker.models;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.annotations.UuidGenerator;
 
 import java.sql.Types;
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -27,4 +26,7 @@ public class User {
     private String password;
     private String cpf;
     private String email;
+
+    @ManyToMany(mappedBy = "users")
+    private List<UserRole> roles;
 }
