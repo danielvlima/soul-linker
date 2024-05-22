@@ -27,7 +27,11 @@ public class UserService {
         return userRepository.findById(userId).orElse(null);
     }
 
-    public UserResponse createUser(CreateUserRequest userRequest){
+    public User registerNewUserAccount(CreateUserRequest userRequest){
+        User existingUser = userRepository.findByEmail(userRequest.getEmail());
+        if (existingUser != null) {
+            throw new RuntimeException("A user with the provided email already exists.");
+        }
         User user = User.builder()
                 .name(userRequest.getName())
                 .birthDate(userRequest.getBirthDate())
@@ -35,21 +39,9 @@ public class UserService {
                 .cpf(userRequest.getCpf())
                 .email(userRequest.getEmail())
                 .build();
-        Optional<User> existingUser = userRepository.findByEmail(userRequest.getEmail());
-        if (existingUser.isPresent()) {
-            throw new RuntimeException("A user with the provided email already exists.");
-        }
 
         user.setPassword(passwordEncoder().encode(user.getPassword()));
 
-        User createdUser = userRepository.save(user);
-
-        return UserResponse.builder()
-                .id(createdUser.getId())
-                .name(createdUser.getName())
-                .birthDate(createdUser.getBirthDate())
-                .cpf(createdUser.getCpf())
-                .email(createdUser.getEmail())
-                .build();
+        return userRepository.save(user);
     }
 }

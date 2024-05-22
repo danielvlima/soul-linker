@@ -5,8 +5,8 @@ import lombok.*;
 import org.hibernate.annotations.JdbcTypeCode;
 
 import java.sql.Types;
+import java.util.Collection;
 import java.util.Date;
-import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -26,7 +26,14 @@ public class User {
     private String password;
     private String cpf;
     private String email;
+    private boolean enabled;
+    private boolean tokenExpired;
 
-    @ManyToMany(mappedBy = "users")
-    private List<UserRole> roles;
+    @ManyToMany
+    @JoinTable(
+            name = "users_roles",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "role_id"))
+    private Collection<Role> roles;
+
 }
